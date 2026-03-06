@@ -13,17 +13,17 @@ export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [input, setInput] = useState("");
 
-  const tarefa = () => {
+  const novaTarefa = () => {
     const texto = input.trim();
     if(!texto) return;
 
-    const novaTarefa: Todo = {
+    const tarefa: Todo = {
       id: Date.now(),
       text: texto,
       completed: false
     };
 
-    setTodos([...todos, novaTarefa]);
+    setTodos((todos) => [...todos, tarefa]);
     setInput("");
 
   };
@@ -38,7 +38,6 @@ export default function Home() {
     ));
   };
 
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 ">
       <div className="bg-white shadow-lg rounded-3xl p-16">
@@ -48,14 +47,14 @@ export default function Home() {
            type="text" className="flex px-3 py-2 border rounded-l-lg focus:outline-none focus:ring-2
             focus:ring-blue-500" placeholder="adicionar uma tarefa"/>
 
-          <button onClick={tarefa} className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600">Adicionar</button>
+          <button onClick={novaTarefa} className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600">Adicionar</button>
         </div>
         <ul className="space-y-2">
           {todos.map((todo) => (
             <li key={todo.id}>
-              <input type="radio" onClick={() => concluiTarefa(todo.id)} className="mr-2" checked={todo.completed}/>
+              <input type="checkbox" onClick={() => concluiTarefa(todo.id)} checked={todo.completed} className="mr-2"/>
               {todo.text} - {todo.completed ? "Concluído" : "Pendente"}
-              <button onClick={() => deletaTarefa(todo.id)} className=" bg-red-500 text-white py-1 hover:bg-red-600">Deletar</button>
+              <button onClick={() => deletaTarefa(todo.id)} className="ml-30 bg-red-500 text-white py-1 px-1 hover:bg-red-600">Deletar</button>
             </li>
           ))}
         </ul>
