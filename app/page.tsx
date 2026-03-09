@@ -1,9 +1,10 @@
 "use client"
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
+import { checkTodo, createTodo, deleteTodo, listarTarefas } from "./api/todo/route";
 
 
 type Todo = {
-  id: number;
+  id?: number;
   text: string;
   completed: boolean;
 }
@@ -13,29 +14,44 @@ export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [input, setInput] = useState("");
 
-  const novaTarefa = () => {
+
+  const listarTodos = async () => {
+    await listarTarefas()
+
+    useEffect(() => {
+      listarTarefas();
+    }, []);
+    setTodos(await listarTarefas());
+  }
+
+
+  const novaTarefa = async () => {
     const texto = input.trim();
     if(!texto) return;
 
     const tarefa: Todo = {
-      id: Date.now(),
       text: texto,
       completed: false
     };
 
-    setTodos((todos) => [...todos, tarefa]);
+    const savedTask = await createTodo(tarefa.text, tarefa.completed);
+
+    setTodos((todos) => [...todos, savedTask]);
     setInput("");
 
   };
 
-  const deletaTarefa = (id: number) => {
+  const deletarTarefa = async (id: number) => {
+      await deleteTodo(id);
       setTodos(todos.filter(todo => todo.id !== id));
   };
 
-  const concluiTarefa = (id: number) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? {...todo, completed: !todo.completed} : todo
-    ));
+  const concluiTarefa =  async (id: number) => {
+    const check = await checkTodo(id, !todos.find(todo => todo.id === id)?.completed);
+    useEffect(() => {
+        checkTodo(id, !todos.find(todo => todo.id === id)?.completed);
+    }, [id]);
+    setTodos(todos.map(todo => todo.id === id ? { ...todo, completed: check.completed } : todo));
   };
 
   return (
@@ -52,9 +68,9 @@ export default function Home() {
         <ul className="space-y-2">
           {todos.map((todo) => (
             <li key={todo.id}>
-              <input type="checkbox" onClick={() => concluiTarefa(todo.id)} checked={todo.completed} className="mr-2"/>
-              {todo.text} - {todo.completed ? "Concluído" : "Pendente"}
-              <button onClick={() => deletaTarefa(todo.id)} className="ml-30 bg-red-500 text-white py-1 px-1 hover:bg-red-600">Deletar</button>
+              <input type="checkbox" onClick={() => concluiTarefa(todo.id ? todo.id : 0)} className="mr-2"/>
+              {todo.text} - {todo.completed ? "Concluída" : "Pendente"}
+              <button onClick={() => deletarTarefa(todo.id ? todo.id : 0)} className="ml-30 bg-red-500 text-white py-1 px-1 hover:bg-red-600">Deletar</button>
             </li>
           ))}
         </ul>
